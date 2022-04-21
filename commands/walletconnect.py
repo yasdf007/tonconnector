@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, command, CommandError
+from discord.ext.commands import Cog, command
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument
 
@@ -20,7 +20,7 @@ key = getenv('TONCENTERKEY')
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
 
 
-class Wallet(Cog):
+class WalletConnect(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -55,7 +55,8 @@ class Wallet(Cog):
             return
 
         letters = string.ascii_letters
-        memo = ''.join(random.choice(letters) for _ in range(6))
+        #memo = ''.join(random.choice(letters) for _ in range(6))
+        memo = 'gaKAZr'
         await ctx.send(f'{ctx.author.mention}, AMOUNT: `0.001 TON`, MEMO (COMMENT): `{memo}`')
 
         async def transactionCatcher():
@@ -93,30 +94,21 @@ class Wallet(Cog):
             await ctx.send(
                 f'{ctx.author.mention}, unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.')
 
-# CHECK FOR NFTS
-    @command(name='scan', description='')
-    async def walletcheck_prefix(self, ctx: Context, address: str):
-        await self.walletcheck(ctx, address)
-
-    async def walletcheck(self, ctx, address: str):
-        query = f" "
-        await ctx.send('RESULT')
-
 
 def setup(bot):
-    bot.add_cog(Wallet(bot))
+    bot.add_cog(WalletConnect(bot))
 
 
-class TonWallet:
-    address: str
+# class TonWallet:
+#     address: str
 
-    def __init__(self, address: str) -> None:
-        self.address = address
+#     def __init__(self, address: str) -> None:
+#         self.address = address
 
-    async def getWalletInformation(self) -> str:
-        params = {"address": self.address}
+#     async def getWalletInformation(self) -> str:
+#         params = {"address": self.address}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(TONCENTER_BASE_URL + '/getAddressInformation', params=params) as resp:
-                res = await resp.json()
-        return res
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(TONCENTER_BASE_URL + '/getAddressInformation', params=params) as resp:
+#                 res = await resp.json()
+#         return res

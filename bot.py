@@ -3,7 +3,7 @@
 
 from discord import Intents
 from discord.ext.commands import Bot as defaultBot, Cog
-
+from db import postgres
 
 from dotenv import load_dotenv
 from os import getenv, listdir
@@ -13,7 +13,6 @@ class Bot(defaultBot):
     def __init__(self):
         intents = Intents.default()
         self.data = load_dotenv()
-
         super().__init__(
             command_prefix="verif ",
             help_command=None,
@@ -31,6 +30,7 @@ class Bot(defaultBot):
 
     @Cog.listener()
     async def on_ready(self):
+        self.database = await postgres.connectToDB()
         print('done loading')
 
 
