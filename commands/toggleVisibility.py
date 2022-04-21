@@ -3,16 +3,12 @@ from discord.ext.commands.context import Context
 
 from resources.AutomatedMessages import automata
 
-from dotenv import load_dotenv
-from os import getenv
+from db import wallet
 
-load_dotenv()
-
-key = getenv('TONCENTERKEY')
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
 
 
-class toggleVisibility(Cog):
+class ToggleVisibility(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -21,8 +17,13 @@ class toggleVisibility(Cog):
         await self.toggleVis(ctx)
 
     async def toggleVis(self, ctx: Context):
-        pass
+        newVis, ok = await wallet.toggleWalletVisibility(self.bot.database, ctx.author.id)
+        if not ok:
+            await ctx.send("could not toggle wallet visibility")
+            return
+
+        await ctx.send(f"Visibility changed to {'public' if newVis else 'private'}")
 
 
 def setup(bot):
-    bot.add_cog(toggleVisibility(bot))
+    bot.add_cog(ToggleVisibility(bot))

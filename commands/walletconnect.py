@@ -5,18 +5,14 @@ from discord.ext.commands.errors import MissingRequiredArgument
 from resources.AutomatedMessages import automata
 from resources import walletChecker
 
+from db import wallet
+
 import random
 import string
 import aiohttp
 import asyncio
 
 
-from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv()
-
-key = getenv('TONCENTERKEY')
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
 
 
@@ -44,7 +40,11 @@ class WalletConnect(Cog):
         """
 
         await ctx.send(f"indev, working. spec address: {address}")
-        params = {"address": address, "api_key": key}
+
+        if await wallet.getWallet(self.bot.database, ctx.author.id) != None:
+            await ctx.send("Wallet is already tethered, proceed if you want to tether another wallet.")
+
+        params = {"address": address, "api_key": self.bot.ton_api_key}
 
         if await walletChecker.isValid(address):
             await ctx.send(embed=automata.generateEmbInfo("Wallet found on TON :white_check_mark:"))
@@ -55,8 +55,7 @@ class WalletConnect(Cog):
             return
 
         letters = string.ascii_letters
-        #memo = ''.join(random.choice(letters) for _ in range(6))
-        memo = 'gaKAZr'
+        memo = ''.join(random.choice(letters) for _ in range(6))
         await ctx.send(f'{ctx.author.mention}, AMOUNT: `0.001 TON`, MEMO (COMMENT): `{memo}`')
 
         async def transactionCatcher():
@@ -87,6 +86,9 @@ class WalletConnect(Cog):
             await asyncio.sleep(20)
 
         if transaction:
+            if not await wallet.insertUserWallet(self.bot.database, ctx.author.id, address):
+                await wallet.updateWallet(self.bot.database, ctx.author.id, address)
+
             await ctx.send(embed=automata.generateEmbInfo("SUCCESS :white_check_mark:"))
             await ctx.send(f"""{ctx.author.mention}, wallet `{address}` is tethered to discord user id `{ctx.author.id}`!""")
         else:

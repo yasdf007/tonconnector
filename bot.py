@@ -7,18 +7,17 @@ from db import postgres
 
 from dotenv import load_dotenv
 from os import getenv, listdir
-
+load_dotenv()
 
 class Bot(defaultBot):
     def __init__(self):
         intents = Intents.default()
-        self.data = load_dotenv()
+        self.ton_api_key = getenv("TONCENTERKEY") 
         super().__init__(
             command_prefix="verif ",
             help_command=None,
             intents=intents,
         )
-
     def Load(self):
         for filename in listdir("./commands"):
             if filename.endswith(".py"):

@@ -6,6 +6,22 @@ async def getWallet(pool: asyncpg.Pool, userId: int):
     return await pool.fetchrow(query, userId)
 
 
+async def updateWallet(pool: asyncpg.Pool, userId: int, walletAddress: str):
+    query = "update user_wallet set address = $1 where user_id = $2"
+    return await pool.execute(query, walletAddress, userId)
+
+
+async def toggleWalletVisibility(pool: asyncpg.Pool, userId: int):
+    walletInfo = await getWallet(pool, userId)
+    if not walletInfo:
+        return False, False
+
+    query = "update user_wallet set public = $1 where user_id = $2"
+    await pool.execute(query, True if not walletInfo["public"] else False, userId)
+
+    return True if not walletInfo["public"] else False, True
+
+
 async def insertUserWallet(pool: asyncpg.Pool, userId: int, walletAddress: str) -> bool:
     if await getWallet(pool, userId) != None:
         return False

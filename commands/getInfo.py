@@ -10,16 +10,10 @@ import aiohttp
 from db import wallet
 from discord.member import Member
 
-from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv()
-
-key = getenv('TONCENTERKEY')
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
 
 
-class getInfo(Cog):
+class GetInfo(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -34,27 +28,22 @@ class getInfo(Cog):
         await self.getUser(ctx, user)
 
     async def getUser(self, ctx: Context, user: Member):
-        addr = wallet.getWallet(self.pool, user.id)
-        if not addr:
-            await ctx.send("User has no wallet connected.")
+        walletInfo = await wallet.getWallet(self.bot.database, user.id)
 
-        data = ''
-        isPublic = True
-
-        params = {"address": addr, "api_key": key}
-        if user in data:
-
-            if isPublic:
-
+        if walletInfo:
+            params = {"address": walletInfo["address"],
+                      "api_key": self.bot.ton_api_key}
+            if walletInfo["public"]:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(TONCENTER_BASE_URL + '/getWalletInformation', params=params) as resp:
                         response = await resp.json()
 
                 embed = Embed(title="**User information**", color=0xff0000)
-                embed.add_field(name="User:", value=user, inline=False)
-                embed.add_field(name="Wallet", value=addr, inline=False)
+                embed.add_field(name="User:", value=user.mention, inline=False)
                 embed.add_field(
-                    name="Balance", value=float(response["result"]["balance"])/10**9, inline=False)
+                    name="Wallet:", value=f'`{walletInfo["address"]}`', inline=False)
+                embed.add_field(
+                    name="Balance:", value=f'{float(response["result"]["balance"])/10**9}:gem:', inline=False)
                 embed.set_thumbnail(
                     url=user.avatar_url_as(static_format="png"))
                 embed.set_footer(
@@ -62,9 +51,9 @@ class getInfo(Cog):
 
             else:
                 embed = Embed(title="**User information**", color=0xff0000)
-                embed.add_field(name="User:", value=user, inline=False)
+                embed.add_field(name="User:", value=user.mention, inline=False)
                 embed.add_field(
-                    name="Wallet", value="verified and hidden :white_check_mark:", inline=False)
+                    name="Wallet:", value="verified and hidden :white_check_mark:", inline=False)
                 embed.set_thumbnail(
                     url=user.avatar_url_as(static_format="png"))
                 embed.set_footer(
@@ -78,4 +67,4 @@ class getInfo(Cog):
 
 
 def setup(bot):
-    bot.add_cog(getInfo(bot))
+    bot.add_cog(GetInfo(bot))
