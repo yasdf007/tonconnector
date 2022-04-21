@@ -43,8 +43,6 @@ class WalletConnect(Cog):
             address (str): ton wallet address
         """
 
-        await ctx.send(f"indev, working. spec address: {address}")
-
         if await wallet.getWallet(self.bot.database, ctx.author.id) != None:
             await ctx.send("Wallet is already tethered, proceed if you want to tether another wallet.")
 
@@ -96,12 +94,12 @@ class WalletConnect(Cog):
 
             result = Embed(title='SUCCESS :white_check_mark:')
             result.add_field(
-                name=f'{ctx.author.mention}', value=f'Your wallet `{address}` is tethered to Yout user id! (`{ctx.author.id}`)', inline=False)
+                name=f'{ctx.author},', value=f'Your wallet `{address}` is tethered to Yout user id! (`{ctx.author.id}`)', inline=False)
             await ctx.send(embed=result)
         else:
             result = Embed(title='FAIL :x:')
             result.add_field(
-                name=f'{ctx.author.mention}', value=f'unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.', inline=False)
+                name=f'{ctx.author},', value=f'unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.', inline=False)
             await ctx.send(embed=result)
 
 
