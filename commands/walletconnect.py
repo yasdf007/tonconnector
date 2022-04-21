@@ -1,6 +1,6 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, dm_only
 from discord.ext.commands.context import Context
-from discord.ext.commands.errors import MissingRequiredArgument
+from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageOnly
 from discord import Embed
 
 from resources.AutomatedMessages import automata
@@ -24,9 +24,12 @@ class WalletConnect(Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
             return await ctx.send(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error))
+        if isinstance(error, PrivateMessageOnly):
+            return await ctx.send(embed=automata.generateEmbErr("You may only use this by DM'ing the bot.", error=error))
 
         raise error
 
+    @dm_only()
     @command(name='connect', description='')
     async def walletconn_prefix(self, ctx: Context, address: str):
         await self.walletconn(ctx, address)
