@@ -22,7 +22,7 @@ class ToggleVisibility(Cog):
             await ctx.send("could not toggle wallet visibility")
             return
 
-        await ctx.send(f"Visibility changed to {'public' if newVis else 'private'}")
+        await ctx.send(embed=automata.generateEmbInfo(f"Visibility changed to {'public' if newVis else 'private'}"))
 
 
 def setup(bot):
