@@ -1,6 +1,7 @@
 from discord.ext.commands import Cog, command
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument
+from discord import Embed
 
 from resources.AutomatedMessages import automata
 from resources import walletChecker
@@ -47,9 +48,10 @@ class WalletConnect(Cog):
         params = {"address": address, "api_key": self.bot.ton_api_key}
 
         if await walletChecker.isValid(address):
-            await ctx.send(embed=automata.generateEmbInfo("Wallet found on TON :white_check_mark:"))
-            await ctx.send("You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
-
+            embed = Embed('Wallet found on TON :white_check_mark:')
+            embed.add_field(name='Follow the instructions!',
+                            value="You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
+            await ctx.send(embed=embed)
         else:
             await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or doesn't have recent transactions. :x:"))
             return
@@ -69,7 +71,7 @@ class WalletConnect(Cog):
                     caught = await resp.json()
 
             if not caught["ok"]:
-                await ctx.send(f"{ctx.author.mention} an unexpected error occurred. Operation cancelled.")
+                await ctx.send(embed=automata.generateEmbErr("An unexpected error occurred. Operation cancelled."))
                 return
 
             for tx in caught["result"]:
@@ -89,12 +91,15 @@ class WalletConnect(Cog):
             if not await wallet.insertUserWallet(self.bot.database, ctx.author.id, address):
                 await wallet.updateWallet(self.bot.database, ctx.author.id, address)
 
-            await ctx.send(embed=automata.generateEmbInfo("SUCCESS :white_check_mark:"))
-            await ctx.send(f"""{ctx.author.mention}, wallet `{address}` is tethered to discord user id `{ctx.author.id}`!""")
+            result = Embed(title='SUCCESS :white_check_mark:')
+            result.add_field(
+                name=f'{ctx.author.mention}', value=f'Your wallet `{address}` is tethered to Yout user id! (`{ctx.author.id}`)', inline=False)
+            await ctx.send(embed=result)
         else:
-            await ctx.send(embed=automata.generateEmbErr("FAIL :x:"))
-            await ctx.send(
-                f'{ctx.author.mention}, unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.')
+            result = Embed(title='FAIL :x:')
+            result.add_field(
+                name=f'{ctx.author.mention}', value=f'unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.', inline=False)
+            await ctx.send(embed=result)
 
 
 def setup(bot):
