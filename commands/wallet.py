@@ -1,6 +1,9 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, CommandError
 from discord.ext.commands.context import Context
+from discord.ext.commands.errors import MissingRequiredArgument
+
 from resources.AutomatedMessages import automata
+from resources import walletChecker
 
 import random
 import string
@@ -21,6 +24,12 @@ class Wallet(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingRequiredArgument):
+            return await ctx.send(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error))
+
+        raise error
+
     @command(name='connect', description='')
     async def walletconn_prefix(self, ctx: Context, address: str):
         await self.walletconn(ctx, address)
@@ -37,16 +46,12 @@ class Wallet(Cog):
         await ctx.send(f"indev, working. spec address: {address}")
         params = {"address": address, "api_key": key}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(TONCENTER_BASE_URL + '/getAddressInformation', params=params) as resp:
-                res = await resp.json()
-
-        if res["ok"]:
-            await ctx.send(embed=automata.generateEmbInfo("Wallet is in TON format. :white_check_mark:"))
+        if await walletChecker.isValid(address):
+            await ctx.send(embed=automata.generateEmbInfo("Wallet found on TON :white_check_mark:"))
             await ctx.send("You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
 
         else:
-            await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or doesn't have recent transactions."))
+            await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or doesn't have recent transactions. :x:"))
             return
 
         letters = string.ascii_letters
@@ -54,6 +59,11 @@ class Wallet(Cog):
         await ctx.send(f'{ctx.author.mention}, AMOUNT: `0.001 TON`, MEMO (COMMENT): `{memo}`')
 
         async def transactionCatcher():
+            """This function checks whether requested transaction was sent
+
+            Returns:
+                bool: True if transaction found, False otherwise
+            """
             async with aiohttp.ClientSession() as session:
                 async with session.get(TONCENTER_BASE_URL + '/getTransactions', params=params) as resp:
                     caught = await resp.json()
@@ -84,7 +94,7 @@ class Wallet(Cog):
                 f'{ctx.author.mention}, unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.')
 
 # CHECK FOR NFTS
-    @command(name='check', description='')
+    @command(name='scan', description='')
     async def walletcheck_prefix(self, ctx: Context, address: str):
         await self.walletcheck(ctx, address)
 
@@ -104,7 +114,7 @@ class TonWallet:
         self.address = address
 
     async def getWalletInformation(self) -> str:
-        params = {"adress": self.address}
+        params = {"address": self.address}
 
         async with aiohttp.ClientSession() as session:
             async with session.get(TONCENTER_BASE_URL + '/getAddressInformation', params=params) as resp:
