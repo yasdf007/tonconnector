@@ -84,8 +84,10 @@ class WalletConnect(Cog):
             caught = await wallet(address).getTransactions()
 
             if not caught["ok"]:
-                await ctx.send(embed=automata.generateEmbErr("An unexpected error occurred. Operation cancelled."))
-                return
+                caught = await wallet(address).getTransactions(archiveNode=True)
+                if not caught["ok"]:
+                    await ctx.send(embed=automata.generateEmbErr("An unexpected error occurred. Operation cancelled."))
+                    return "Err"
 
             for tx in caught["result"]:
                 if tx["in_msg"]["message"] == memo and tx["in_msg"]["source"] == tx["in_msg"]["destination"] and tx["in_msg"]["value"] == "1000000":
@@ -96,11 +98,13 @@ class WalletConnect(Cog):
         # the following part requires rewriting using asyncio Tasks
         for _ in range(60*5//20):
             transaction = await transactionCatcher()
-            if transaction == True:
+
+            if transaction:
                 break
+
             await asyncio.sleep(20)
 
-        if transaction:
+        if transaction == True:
             if not await dbQuery.insertUserWallet(self.bot.database, ctx.author.id, address):
                 await dbQuery.updateWallet(self.bot.database, ctx.author.id, address)
 

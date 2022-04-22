@@ -41,7 +41,7 @@ class TonWallet():
 
         return response
 
-    async def getTransactions(self):
+    async def getTransactions(self, archiveNode=False):
         """_summary_
 
         Returns:
@@ -49,7 +49,7 @@ class TonWallet():
         """
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.TONCENTER_BASE_URL + '/getTransactions', params=self.params) as resp:
+            async with session.get(self.TONCENTER_BASE_URL + '/getTransactions', params=self.params | {"archival": archiveNode}) as resp:
                 caught = await resp.json()
 
         return caught
