@@ -5,8 +5,6 @@ from resources.AutomatedMessages import automata
 
 from db import dbQuery
 
-TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
-
 
 class ToggleVisibility(Cog):
     def __init__(self, bot):
