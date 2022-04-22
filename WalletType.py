@@ -49,7 +49,7 @@ class TonWallet():
         """
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(self.TONCENTER_BASE_URL + '/getTransactions', params=self.params | {"archival": archiveNode}) as resp:
+            async with session.get(self.TONCENTER_BASE_URL + '/getTransactions', params=self.params | {"archival": f'{archiveNode}'}) as resp:
                 caught = await resp.json()
 
         return caught
