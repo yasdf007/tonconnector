@@ -46,7 +46,7 @@ class WalletConnect(Cog):
             await ctx.send("Wallet is already tethered, proceed if you want to tether another wallet.")
 
         if await wallet(address).isValid():
-            embed = Embed('Wallet found on TON :white_check_mark:')
+            embed = Embed(title='Wallet found on TON :white_check_mark:')
             embed.add_field(name='Follow the instructions!',
                             value="You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
             await ctx.send(embed=embed)
@@ -90,7 +90,7 @@ class WalletConnect(Cog):
 
             result = Embed(title='SUCCESS :white_check_mark:')
             result.add_field(
-                name=f'{ctx.author},', value=f'Your wallet `{address}` is tethered to Yout user id! (`{ctx.author.id}`)', inline=False)
+                name=f'{ctx.author},', value=f'Your wallet `{address}` is tethered to Your user id! (`{ctx.author.id}`)', inline=False)
             await ctx.send(embed=result)
         else:
             result = Embed(title='FAIL :x:')

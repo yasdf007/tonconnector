@@ -61,24 +61,24 @@ class GetInfo(Cog):
 
         await ctx.send(embed=embed)
 
-        @command(name='shareMy')
-        async def shareMy_prefix(self, ctx: Context):
-            await self.shareMy(ctx)
+    @command(name='shareMy')
+    async def shareMy_prefix(self, ctx: Context):
+        await self.shareMy(ctx)
 
-        async def shareMy(self, ctx: Context):
-            walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
+    async def shareMy(self, ctx: Context):
+        walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
 
-            if walletInfo:
+        if walletInfo:
 
-                embed = Embed(title="Secure wallet sharing:", color=0x26ff00)
-                embed.add_field(
-                    name=':white_check_mark', value=f'{ctx.author.mention} is confirmed owner of `{walletInfo["address"]}`')
-                embed.set_footer(
-                    f'Presented data is verified via TON Connector.')
-                await ctx.send(embed=embed)
+            embed = Embed(title="Secure wallet sharing:", color=0x26ff00)
+            embed.add_field(
+                name=':white_check_mark:', value=f'{ctx.author.mention} is confirmed owner of `{walletInfo["address"]}`')
+            embed.set_footer(
+                text=f'Presented data is verified via TON Connector.')
+            await ctx.send(embed=embed)
 
-            else:
-                await ctx.send(embed=automata.generateEmbErr(f"{ctx.author}, You haven't verified your wallet yet."))
+        else:
+            await ctx.send(embed=automata.generateEmbErr(f"{ctx.author}, You haven't verified your wallet yet."))
 
 
 def setup(bot):
