@@ -29,7 +29,7 @@ class Help(Cog):
         embed.add_field(name="Public/Private visibility",
                         value="`verif visibility` - toggles your address visibility (public/private) [private by default]", inline=False)
         embed.add_field(name="Wallet sharing",
-                        value="`verif shareMy` - shares Your wallet to current channel")
+                        value="`verif share` - shares Your wallet to current channel")
         embed.set_footer(
             text="TON Connector is in alpha.")
         await ctx.send(embed=embed)

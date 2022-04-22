@@ -10,8 +10,6 @@ from resources.AutomatedMessages import automata
 from db import dbQuery
 from discord.member import Member
 
-TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
-
 
 class GetInfo(Cog):
     def __init__(self, bot):
@@ -61,7 +59,7 @@ class GetInfo(Cog):
 
         await ctx.send(embed=embed)
 
-    @command(name='shareMy')
+    @command(name='share')
     async def shareMy_prefix(self, ctx: Context):
         await self.shareMy(ctx)
 
