@@ -3,7 +3,7 @@ from discord.ext.commands.context import Context
 
 from resources.AutomatedMessages import automata
 
-from db import wallet
+from db import dbQuery
 
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
 
@@ -17,7 +17,7 @@ class ToggleVisibility(Cog):
         await self.toggleVis(ctx)
 
     async def toggleVis(self, ctx: Context):
-        newVis, ok = await wallet.toggleWalletVisibility(self.bot.database, ctx.author.id)
+        newVis, ok = await dbQuery.toggleWalletVisibility(self.bot.database, ctx.author.id)
         if not ok:
             await ctx.send("could not toggle wallet visibility")
             return

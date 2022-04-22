@@ -1,3 +1,5 @@
+from WalletType import TonWallet as wallet
+
 from discord.ext.commands import Cog, command
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument
@@ -5,9 +7,7 @@ from discord import Embed
 
 from resources.AutomatedMessages import automata
 
-import aiohttp
-
-from db import wallet
+from db import dbQuery
 from discord.member import Member
 
 TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
@@ -28,15 +28,11 @@ class GetInfo(Cog):
         await self.getUser(ctx, user)
 
     async def getUser(self, ctx: Context, user: Member):
-        walletInfo = await wallet.getWallet(self.bot.database, user.id)
+        walletInfo = await dbQuery.getWallet(self.bot.database, user.id)
 
         if walletInfo:
-            params = {"address": walletInfo["address"],
-                      "api_key": self.bot.ton_api_key}
             if walletInfo["public"]:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(TONCENTER_BASE_URL + '/getWalletInformation', params=params) as resp:
-                        response = await resp.json()
+                response = await wallet(walletInfo["address"]).getWalletInformation()
 
                 embed = Embed(title="**User information**", color=0xff0000)
                 embed.add_field(name="User:", value=user.mention, inline=False)
@@ -70,7 +66,7 @@ class GetInfo(Cog):
             await self.shareMy(ctx)
 
         async def shareMy(self, ctx: Context):
-            walletInfo = await wallet.getWallet(self.bot.database, ctx.author.id)
+            walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
 
             if walletInfo:
 

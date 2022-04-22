@@ -1,16 +1,15 @@
+from WalletType import TonWallet as wallet
+
 from discord.ext.commands import Cog, command, dm_only
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageOnly
 from discord import Embed
 
+from db import dbQuery
 from resources.AutomatedMessages import automata
-from resources import walletChecker
-
-from db import wallet
 
 import random
 import string
-import aiohttp
 import asyncio
 
 
@@ -43,12 +42,10 @@ class WalletConnect(Cog):
             address (str): ton wallet address
         """
 
-        if await wallet.getWallet(self.bot.database, ctx.author.id) != None:
+        if await dbQuery.getWallet(self.bot.database, ctx.author.id) != None:
             await ctx.send("Wallet is already tethered, proceed if you want to tether another wallet.")
 
-        params = {"address": address, "api_key": self.bot.ton_api_key}
-
-        if await walletChecker.isValid(address):
+        if await wallet(address).isValid():
             embed = Embed('Wallet found on TON :white_check_mark:')
             embed.add_field(name='Follow the instructions!',
                             value="You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
@@ -67,9 +64,8 @@ class WalletConnect(Cog):
             Returns:
                 bool: True if transaction found, False otherwise
             """
-            async with aiohttp.ClientSession() as session:
-                async with session.get(TONCENTER_BASE_URL + '/getTransactions', params=params) as resp:
-                    caught = await resp.json()
+
+            caught = wallet(address).getTransactions()
 
             if not caught["ok"]:
                 await ctx.send(embed=automata.generateEmbErr("An unexpected error occurred. Operation cancelled."))
@@ -89,8 +85,8 @@ class WalletConnect(Cog):
             await asyncio.sleep(20)
 
         if transaction:
-            if not await wallet.insertUserWallet(self.bot.database, ctx.author.id, address):
-                await wallet.updateWallet(self.bot.database, ctx.author.id, address)
+            if not await dbQuery.insertUserWallet(self.bot.database, ctx.author.id, address):
+                await dbQuery.updateWallet(self.bot.database, ctx.author.id, address)
 
             result = Embed(title='SUCCESS :white_check_mark:')
             result.add_field(
@@ -105,18 +101,3 @@ class WalletConnect(Cog):
 
 def setup(bot):
     bot.add_cog(WalletConnect(bot))
-
-
-# class TonWallet:
-#     address: str
-
-#     def __init__(self, address: str) -> None:
-#         self.address = address
-
-#     async def getWalletInformation(self) -> str:
-#         params = {"address": self.address}
-
-#         async with aiohttp.ClientSession() as session:
-#             async with session.get(TONCENTER_BASE_URL + '/getAddressInformation', params=params) as resp:
-#                 res = await resp.json()
-#         return res
