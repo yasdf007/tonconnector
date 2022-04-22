@@ -28,8 +28,10 @@ class Help(Cog):
                         value="`verif user [@user]` - shows the information about user (whether he has verified wallet or not). Balance and full address available if user decides to toggle public visibility.", inline=False)
         embed.add_field(name="Public/Private visibility",
                         value="`verif visibility` - toggles your address visibility (public/private) [private by default]", inline=False)
+        embed.add_field(name="Wallet sharing",
+                        value="`verif shareMy` - shares Your wallet to current channel")
         embed.set_footer(
-            text="TON Connector is in alpha. Proceed with caution.")
+            text="TON Connector is in alpha.")
         await ctx.send(embed=embed)
 
 
