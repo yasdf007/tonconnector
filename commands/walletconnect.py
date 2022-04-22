@@ -3,7 +3,7 @@ from WalletType import TonWallet as wallet
 from discord.ext.commands import Cog, command, dm_only
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageOnly
-from discord import Embed
+from discord import Embed, File
 
 from db import dbQuery
 from resources.AutomatedMessages import automata
@@ -11,9 +11,8 @@ from resources.AutomatedMessages import automata
 import random
 import string
 import asyncio
-
-
-TONCENTER_BASE_URL = "https://toncenter.com/api/v2"
+import qrcode
+from io import BytesIO
 
 
 class WalletConnect(Cog):
@@ -43,7 +42,7 @@ class WalletConnect(Cog):
         """
 
         if await dbQuery.getWallet(self.bot.database, ctx.author.id) != None:
-            await ctx.send("Wallet is already tethered, proceed if you want to tether another wallet.")
+            await ctx.send(embed=automata.generateEmbInfo("Wallet is already tethered, proceed ONLY if you want to tether another wallet :exclamation:"))
 
         if await wallet(address).isValid():
             embed = Embed(title='Wallet found on TON :white_check_mark:')
@@ -56,7 +55,24 @@ class WalletConnect(Cog):
 
         letters = string.ascii_letters
         memo = ''.join(random.choice(letters) for _ in range(6))
-        await ctx.send(f'{ctx.author.mention}, AMOUNT: `0.001 TON`, MEMO (COMMENT): `{memo}`')
+        requiredTransaction = Embed(
+            title='Make a transaction with following parameters:')
+        requiredTransaction.add_field(
+            name='AMOUNT:', value=f'`0.001`:gem:', inline=False)
+        requiredTransaction.add_field(
+            name='RECIPIENT:', value=f'`{address}`', inline=False)
+        requiredTransaction.add_field(
+            name='MEMO (COMMENT):', value=f'`{memo}`', inline=False)
+
+        qrlink = f'ton://transfer/{address}?amount={0.001* 10**9}&text={memo}'
+        img = qrcode.make(qrlink)
+
+        with BytesIO() as temp:
+            img.save(temp, "png")
+            temp.seek(0)
+            file = File(fp=temp, filename="qr.png")
+            requiredTransaction.set_image(url="attachment://qr.png")
+            await ctx.send(file=file, embed=requiredTransaction)
 
         async def transactionCatcher():
             """This function checks whether requested transaction was sent

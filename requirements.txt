@@ -1,3 +1,4 @@
 discord.py==1.7.3
 python-dotenv==0.20.0
 asyncpg==0.25.0
+qrcode==7.3.1
