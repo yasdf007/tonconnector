@@ -26,5 +26,4 @@ class automata:
             title=f'**{x}**',
             color=Colour.dark_green()
         )
-        result.set_footer(text='bot message')
         return result
