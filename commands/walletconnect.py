@@ -65,7 +65,7 @@ class WalletConnect(Cog):
                 bool: True if transaction found, False otherwise
             """
 
-            caught = wallet(address).getTransactions()
+            caught = await wallet(address).getTransactions()
 
             if not caught["ok"]:
                 await ctx.send(embed=automata.generateEmbErr("An unexpected error occurred. Operation cancelled."))
