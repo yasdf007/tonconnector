@@ -2,7 +2,7 @@ from WalletType import TonWallet as wallet
 
 from discord.ext.commands import Cog, command, guild_only, cooldown, BucketType
 from discord.ext.commands.context import Context
-from discord.ext.commands.errors import MissingRequiredArgument
+from discord.ext.commands.errors import MissingRequiredArgument, CommandOnCooldown, NoPrivateMessage
 from discord.member import Member
 from discord import Embed
 
@@ -17,17 +17,35 @@ class GetInfo(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error))
+            return await ctx.message.reply(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error))
 
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "This command can only be used in server channel.", error=error
+                )
+            )
+        if isinstance(error, CommandOnCooldown):
+            await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "This command is on cooldown. Try again later.",
+                    error=error,
+                )
+            )
         raise error
 
     @guild_only()
     @cooldown(rate=3, per=300, type=BucketType.user)
     @command(name='user', description='')
-    async def getUser_prefix(self, ctx: Context, user: Member):
+    async def getUser_prefix(self, ctx: Context, user: Member = None):
+        if not ctx.guild:
+            raise NoPrivateMessage
+        if not user:
+            user = ctx.author
         await self.getUser(ctx, user)
 
     async def getUser(self, ctx: Context, user: Member):
+        await ctx.message.delete()
         walletInfo = await dbQuery.getWallet(self.bot.database, user.id)
 
         if walletInfo:
@@ -65,9 +83,12 @@ class GetInfo(Cog):
     @cooldown(rate=2, per=120, type=BucketType.user)
     @command(name='share')
     async def shareMy_prefix(self, ctx: Context):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.shareMy(ctx)
 
     async def shareMy(self, ctx: Context):
+        await ctx.message.delete()
         walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
 
         if walletInfo:
@@ -80,7 +101,7 @@ class GetInfo(Cog):
             await ctx.send(embed=embed)
 
         else:
-            await ctx.send(embed=automata.generateEmbErr(f"{ctx.author}, You haven't verified your wallet yet."))
+            await ctx.send(embed=automata.generateEmbErr(f"{ctx.author}, You haven't verified your wallet yet."), delete_after=10)
 
 
 def setup(bot):

@@ -21,9 +21,10 @@ class WalletConnect(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error))
+            return await ctx.message.reply(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error), delete_after=10)
         if isinstance(error, PrivateMessageOnly):
-            return await ctx.send(embed=automata.generateEmbErr("You may only use this by DM'ing the bot.", error=error))
+            await ctx.message.delete()
+            return await ctx.send(embed=automata.generateEmbErr("You may only connect Your wallet by using direct messages. This is made to keep your data private and secured.", error=error), delete_after=10)
 
         raise error
 
