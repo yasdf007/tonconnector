@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, cooldown, BucketType
 from discord.ext.commands.context import Context
 
 from resources.AutomatedMessages import automata
@@ -10,6 +10,7 @@ class ToggleVisibility(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @cooldown(rate=2, per=300, type=BucketType.user)
     @command(name='visibility', description='')
     async def toggle_prefix(self, ctx: Context):
         await self.toggleVis(ctx)

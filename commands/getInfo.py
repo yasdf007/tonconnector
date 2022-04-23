@@ -1,14 +1,14 @@
 from WalletType import TonWallet as wallet
 
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, guild_only, cooldown, BucketType,
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument
+from discord.member import Member
 from discord import Embed
 
 from resources.AutomatedMessages import automata
 
 from db import dbQuery
-from discord.member import Member
 
 
 class GetInfo(Cog):
@@ -21,6 +21,8 @@ class GetInfo(Cog):
 
         raise error
 
+    @guild_only()
+    @cooldown(rate=3, per=300, type=BucketType.user)
     @command(name='user', description='')
     async def getUser_prefix(self, ctx: Context, user: Member):
         await self.getUser(ctx, user)
@@ -59,6 +61,8 @@ class GetInfo(Cog):
 
         await ctx.send(embed=embed)
 
+    @guild_only()
+    @cooldown(rate=2, per=120, type=BucketType.user)
     @command(name='share')
     async def shareMy_prefix(self, ctx: Context):
         await self.shareMy(ctx)

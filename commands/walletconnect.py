@@ -1,6 +1,6 @@
 from WalletType import TonWallet as wallet
 
-from discord.ext.commands import Cog, command, dm_only
+from discord.ext.commands import Cog, command, dm_only, BucketType, cooldown
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageOnly
 from discord import Embed, File
@@ -28,6 +28,7 @@ class WalletConnect(Cog):
         raise error
 
     @dm_only()
+    @cooldown(rate=1, per=360, type=BucketType.user)
     @command(name='connect', description='')
     async def walletconn_prefix(self, ctx: Context, address: str):
         await self.walletconn(ctx, address)
