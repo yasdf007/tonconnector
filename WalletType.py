@@ -29,10 +29,10 @@ class TonWallet():
         return res["ok"]
 
     async def getWalletInformation(self):
-        """_summary_
+        """Gets wallet information as provided by toncenter API v2
 
         Returns:
-            _type_: _description_
+            dict: json-response of toncenter api
         """
 
         async with aiohttp.ClientSession() as session:
@@ -42,10 +42,10 @@ class TonWallet():
         return response
 
     async def getTransactions(self, archiveNode=False):
-        """_summary_
+        """Gets transactions as provided by toncenter API v2
 
         Returns:
-            _type_: _description_
+            dict: json-response of toncenter api
         """
 
         async with aiohttp.ClientSession() as session:
