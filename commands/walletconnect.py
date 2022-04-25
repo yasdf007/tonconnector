@@ -1,6 +1,6 @@
-from WalletType import TonWallet as wallet
+from resources.WalletType import TonWallet as wallet
 
-from discord.ext.commands import Cog, command, dm_only, BucketType, cooldown
+from discord.ext.commands import Cog, command, dm_only, BucketType, cooldown, CommandOnCooldown
 from discord.ext.commands.context import Context
 from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageOnly
 from discord import Embed, File
@@ -25,6 +25,8 @@ class WalletConnect(Cog):
         if isinstance(error, PrivateMessageOnly):
             await ctx.message.delete()
             return await ctx.send(embed=automata.generateEmbErr("You may only connect Your wallet by using direct messages. This is made to keep your data private and secured.", error=error), delete_after=10)
+        if isinstance(error, CommandOnCooldown):
+            return await ctx.message.reply(embed=automata.generateEmbErr("In order to avoid overloading we have set 6 minutes long cooldown on this command. Try again later.", error=error))
 
         raise error
 
@@ -40,19 +42,23 @@ class WalletConnect(Cog):
 
         Args:
             ctx (Context): discord.py Context class
-            address (str): ton wallet address
+            address (str): ton wallet address (any form)
         """
 
-        if await dbQuery.getWallet(self.bot.database, ctx.author.id) != None:
-            await ctx.send(embed=automata.generateEmbInfo("Wallet is already tethered, proceed ONLY if you want to tether another wallet :exclamation:"))
-
         if await wallet(address).isValid():
+            addrForms = await wallet(address).detectAddress(custDict=True)
+            address = addrForms['standard']
+
+            if await dbQuery.getWallet(self.bot.database, ctx.author.id) != None:
+                await ctx.send(embed=automata.generateEmbInfo("Wallet is already tethered, proceed ONLY if you want to tether another wallet :exclamation:"))
+
             embed = Embed(title='Wallet found on TON :white_check_mark:')
             embed.add_field(name='Follow the instructions!',
                             value="You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
             await ctx.send(embed=embed)
+
         else:
-            await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or doesn't have recent transactions. :x:"))
+            await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or not initialized. :x:"))
             return
 
         letters = string.ascii_letters
