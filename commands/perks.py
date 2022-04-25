@@ -1,11 +1,12 @@
 from resources.WalletType import TonWallet
 from resources.AutomatedMessages import automata
-from resources.Errors import NoWalletFound
+from resources.Errors import NoWalletFound, RequestError
 
 from db import dbQuery
 
 from discord.ext.commands import Cog, command, Context, cooldown, CommandOnCooldown, guild_only, BucketType, NoPrivateMessage
 from discord import Embed
+
 
 class Perks(Cog):
     def __init__(self, bot):
@@ -26,7 +27,13 @@ class Perks(Cog):
                     error=error
                 )
             )
-
+        if isinstance(error, RequestError):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    f"Data cannot be loaded. Contact bot support. :x:",
+                    error=error
+                )
+            )
         raise error
 
     @guild_only()
@@ -40,13 +47,14 @@ class Perks(Cog):
     async def perkcheck(self, ctx: Context):
         collectionDict = await dbQuery.getConnectedCollection(self.bot.database, ctx.guild.id)
         if not collectionDict:
-            await ctx.send("This server is not connected to this bot")
+            await ctx.send(embed=automata.generateEmbErr("This server has no perks available via TON Connector."))
             return
 
         role = ctx.guild.get_role(collectionDict['role_id'])
         if role in ctx.author.roles:
-            await ctx.send(f"You already have this role {role.name}")
+            await ctx.send(embed=automata.generateEmbErr(f"You have already obtained your NFT holder perks."))
             return
+
         walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
         if not walletInfo:
             raise NoWalletFound
@@ -54,36 +62,40 @@ class Perks(Cog):
         wallet = TonWallet(walletInfo["address"])
 
         res = await self.bot.disintar_api.get_address_entities(wallet.address)
-        if not res['success']:
-            await ctx.send("Could not fetch remote data")
-            return
-        
+
+        if not res or not res['success']:
+            raise RequestError
+
         if not res['data']:
             forms = await wallet.detectAddress(custDict=True)
+
+            if not forms:
+                raise RequestError
+
             res = await self.bot.disintar_api.get_address_entities(forms['nb64url'])
-            if not res['success']:
-                await ctx.send("Could not fetch remote data")
-                return
-        
+
+            if not res or not res['success']:
+                raise RequestError
+
         if not res['data']:
-            await ctx.send("No nft were found on your account")
+            await ctx.send(embed=automata.generateEmbErr('No NFTs were found on your wallet. :x:'))
             return
+
+        await ctx.message.delete()
 
         for nft in res['data']:
             if nft['collection']['address'] == collectionDict['collection_address']:
                 await ctx.author.add_roles(role)
-                embed = Embed(title='123')
-                embed.add_field(name='123',value=f"You were given role: {role.mention}")
+                embed = Embed(title='SUCCESS :white_check_mark:')
+                embed.add_field(name='Perk received:',
+                                value=f"You were given {role.mention} role!", inline=False)
+                embed.add_field(name='For holding:',
+                                value=f'{nft["name"]}', inline=False)
                 await ctx.send(embed=embed)
                 return
 
-        await ctx.send("No connected nft were found")
-# MIGHT BE IMPLEMENTED AS DISINTAR.ISITUSER(WALLET) AND TWO FORMS PASSED
-        # for form in [forms[2], forms[4]]:
-            # disintar scan if this wallet address form profile is found
-        #    pass
+        await ctx.send(embed=automata.generateEmbErr("No eligible NFTs were found. :x:"))
 
-        # IF NFT OF USER IS IN PERK VARS THEN GIVE ROLE ELSE NO PERKS FOUND.
 
 def setup(bot):
     bot.add_cog(Perks(bot))

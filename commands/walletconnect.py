@@ -1,6 +1,6 @@
 from resources.WalletType import TonWallet as wallet
 from resources.AutomatedMessages import automata
-from resources.Errors import NotTONAddress
+from resources.Errors import NotTONAddress, RequestError
 
 from discord.ext.commands import Cog, command, dm_only, BucketType, cooldown, CommandOnCooldown
 from discord.ext.commands.context import Context
@@ -48,7 +48,13 @@ class WalletConnect(Cog):
                     "Wallet is either invalid or uninitialized. :x:",
                     error=error
                 ))
-
+        if isinstance(error, RequestError):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    f"Data cannot be loaded. Contact bot support. :x:",
+                    error=error
+                )
+            )
         raise error
 
     @dm_only()
@@ -110,6 +116,9 @@ class WalletConnect(Cog):
             """
 
             caught = await wallet(address).getTransactions()
+
+            if not caught:
+                raise RequestError
 
             if not caught["ok"]:
                 caught = await wallet(address).getTransactions(archiveNode=True)

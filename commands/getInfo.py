@@ -1,4 +1,4 @@
-from resources.Errors import NoWalletFound
+from resources.Errors import NoWalletFound, RequestError
 from resources.WalletType import TonWallet as wallet
 
 from discord.ext.commands import Cog, command, guild_only, cooldown, BucketType
@@ -28,20 +28,26 @@ class GetInfo(Cog):
                 )
             )
         if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(
+            return await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     "This command is on cooldown. Try again later.",
                     error=error
                 )
             )
         if isinstance(error, NoWalletFound):
-            await ctx.message.reply(
+            return await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     f"User hasn't verified their wallet yet. :x:",
                     error=error
                 )
             )
-
+        if isinstance(error, RequestError):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    f"Data cannot be loaded. Contact bot support. :x:",
+                    error=error
+                )
+            )
         raise error
 
     @ guild_only()
@@ -62,7 +68,6 @@ class GetInfo(Cog):
             user (Member): discord guild user
         """
 
-        await ctx.message.delete()
         walletInfo = await dbQuery.getWallet(self.bot.database, user.id)
 
         if walletInfo:
@@ -72,6 +77,9 @@ class GetInfo(Cog):
                 # meaning it should initially be stored elsewhere.
 
                 response = await wallet(walletInfo["address"]).getWalletInformation()
+
+                if not response:
+                    raise RequestError
 
                 embed = Embed(title="**User information**", color=0xff0000)
                 embed.add_field(name="User:", value=user.mention, inline=False)
@@ -93,6 +101,7 @@ class GetInfo(Cog):
         else:
             raise NoWalletFound
 
+        await ctx.message.delete()
         await ctx.send(embed=embed)
 
     @ guild_only()

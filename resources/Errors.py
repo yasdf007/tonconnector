@@ -7,3 +7,7 @@ class NoWalletFound(CommandError):
 
 class NotTONAddress(CommandError):
     pass
+
+
+class RequestError(CommandError):
+    pass
