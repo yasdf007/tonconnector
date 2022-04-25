@@ -21,7 +21,6 @@ class ToggleVisibility(Cog):
                 )
             )
         if isinstance(error, NoWalletFound):
-            print("caught!", error)
             return await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     "You haven't tethered your TON wallet yet.",
