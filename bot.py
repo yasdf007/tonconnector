@@ -2,7 +2,7 @@
 # (c) Bonzoteam 2022
 
 from discord import Intents, Game, Status
-from discord.ext.commands import Bot as defaultBot, Cog
+from discord.ext.commands import Bot as defaultBot, Cog, CommandNotFound
 from db import postgres
 
 from dotenv import load_dotenv
@@ -35,6 +35,11 @@ class Bot(defaultBot):
         self.database = await postgres.connectToDB()
         await self.change_presence(status=Status.online, activity=self.game)
         print('done loading')
+
+    @Cog.listener()
+    async def on_command_error(self, error):
+        if isinstance(error, CommandNotFound):
+            pass
 
 
 if __name__ == "__main__":
