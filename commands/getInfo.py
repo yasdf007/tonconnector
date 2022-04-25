@@ -57,7 +57,7 @@ class GetInfo(Cog):
                 embed.add_field(
                     name="Wallet:", value=f'`{walletInfo["address"]}`', inline=False)
                 embed.add_field(
-                    name="Balance:", value=f'{float(response["result"]["balance"])/10**9}:gem:', inline=False)
+                    name="Balance:", value=f'`{float(response["result"]["balance"])/10**9}`:gem:', inline=False)
                 embed.set_thumbnail(
                     url=user.avatar_url_as(static_format="png"))
                 embed.set_footer(
