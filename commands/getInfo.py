@@ -1,3 +1,4 @@
+from resources.Errors import NoWalletFound
 from resources.WalletType import TonWallet as wallet
 
 from discord.ext.commands import Cog, command, guild_only, cooldown, BucketType
@@ -22,21 +23,30 @@ class GetInfo(Cog):
         if isinstance(error, NoPrivateMessage):
             return await ctx.message.reply(
                 embed=automata.generateEmbErr(
-                    "This command can only be used in server channel.", error=error
+                    "This command can only be used in server channel.",
+                    error=error
                 )
             )
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     "This command is on cooldown. Try again later.",
-                    error=error,
+                    error=error
                 )
             )
+        if isinstance(error, NoWalletFound):
+            await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    f"User hasn't verified their wallet yet. :x:",
+                    error=error
+                )
+            )
+
         raise error
 
-    @guild_only()
-    @cooldown(rate=3, per=300, type=BucketType.user)
-    @command(name='user')
+    @ guild_only()
+    @ cooldown(rate=3, per=300, type=BucketType.user)
+    @ command(name='user')
     async def getUser_prefix(self, ctx: Context, user: Member = None):
         if not ctx.guild:
             raise NoPrivateMessage
@@ -81,14 +91,13 @@ class GetInfo(Cog):
                     url=user.avatar_url_as(static_format="png"))
 
         else:
-            embed = automata.generateEmbErr(
-                f"User {user} hasn't verified their wallet yet. :x:")
+            raise NoWalletFound
 
         await ctx.send(embed=embed)
 
-    @guild_only()
-    @cooldown(rate=2, per=120, type=BucketType.user)
-    @command(name='share')
+    @ guild_only()
+    @ cooldown(rate=2, per=120, type=BucketType.user)
+    @ command(name='share')
     async def shareMy_prefix(self, ctx: Context):
         if not ctx.guild:
             raise NoPrivateMessage

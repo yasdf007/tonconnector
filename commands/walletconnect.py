@@ -1,4 +1,6 @@
 from resources.WalletType import TonWallet as wallet
+from resources.AutomatedMessages import automata
+from resources.Errors import NotTONAddress
 
 from discord.ext.commands import Cog, command, dm_only, BucketType, cooldown, CommandOnCooldown
 from discord.ext.commands.context import Context
@@ -6,7 +8,6 @@ from discord.ext.commands.errors import MissingRequiredArgument, PrivateMessageO
 from discord import Embed, File
 
 from db import dbQuery
-from resources.AutomatedMessages import automata
 
 import random
 import string
@@ -41,6 +42,12 @@ class WalletConnect(Cog):
                     "In order to avoid overloading we have set 6 minutes long cooldown on this command. Try again later.",
                     error=error
                 ))
+        if isinstance(error, NotTONAddress):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "Wallet is either invalid or uninitialized. :x:",
+                    error=error
+                ))
 
         raise error
 
@@ -72,8 +79,7 @@ class WalletConnect(Cog):
             await ctx.send(embed=embed)
 
         else:
-            await ctx.send(embed=automata.generateEmbErr("Wallet is either invalid or not initialized. :x:"))
-            return
+            raise NotTONAddress
 
         letters = string.ascii_letters
         memo = ''.join(random.choice(letters) for _ in range(6))
