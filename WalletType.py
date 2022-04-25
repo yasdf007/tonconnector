@@ -50,6 +50,22 @@ class TonWallet():
 
         async with aiohttp.ClientSession() as session:
             async with session.get(self.TONCENTER_BASE_URL + '/getTransactions', params=self.params | {"archival": f'{archiveNode}'}) as resp:
-                caught = await resp.json()
+                response = await resp.json()
 
-        return caught
+        return response
+
+    async def detectAddress(self, custDict=False):
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.TONCENTER_BASE_URL + '/detectAddress', params=self.params) as resp:
+                response = await resp.json()
+
+        if not custDict:
+            return response
+
+        return {'raw': response["result"]["raw_form"],
+                'bb64': response["result"]["bounceable"]["b64"],
+                'standard': response["result"]["bounceable"]["b64url"],
+                'nb64': response["result"]["non_bounceable"]["b64"],
+                'nb64url': response["result"]["non_bounceable"]["b64url"]
+                }
