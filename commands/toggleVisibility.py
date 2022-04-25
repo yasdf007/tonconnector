@@ -31,7 +31,7 @@ class ToggleVisibility(Cog):
         raise error
 
     @cooldown(rate=2, per=300, type=BucketType.user)
-    @command(name='visibility', description='')
+    @command(name='visibility')
     async def toggle_prefix(self, ctx: Context):
         await self.toggleVis(ctx)
 

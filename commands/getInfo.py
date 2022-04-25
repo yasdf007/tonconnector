@@ -36,7 +36,7 @@ class GetInfo(Cog):
 
     @guild_only()
     @cooldown(rate=3, per=300, type=BucketType.user)
-    @command(name='user', description='')
+    @command(name='user')
     async def getUser_prefix(self, ctx: Context, user: Member = None):
         if not ctx.guild:
             raise NoPrivateMessage

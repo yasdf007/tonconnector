@@ -46,7 +46,7 @@ class WalletConnect(Cog):
 
     @dm_only()
     @cooldown(rate=1, per=360, type=BucketType.user)
-    @command(name='connect', description='')
+    @command(name='connect')
     async def walletconn_prefix(self, ctx: Context, address: str):
         await self.walletconn(ctx, address)
 
