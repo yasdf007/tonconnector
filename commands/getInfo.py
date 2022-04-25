@@ -1,4 +1,4 @@
-from WalletType import TonWallet as wallet
+from resources.WalletType import TonWallet as wallet
 
 from discord.ext.commands import Cog, command, guild_only, cooldown, BucketType
 from discord.ext.commands.context import Context
