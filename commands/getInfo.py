@@ -45,11 +45,22 @@ class GetInfo(Cog):
         await self.getUser(ctx, user)
 
     async def getUser(self, ctx: Context, user: Member):
+        """returns embed with user info depending on privacy settings.
+
+        Args:
+            ctx (Context): context
+            user (Member): discord guild user
+        """
+
         await ctx.message.delete()
         walletInfo = await dbQuery.getWallet(self.bot.database, user.id)
 
         if walletInfo:
             if walletInfo["public"]:
+
+                # we should obtain toncoin price there. it should come regurarly from the API,
+                # meaning it should initially be stored elsewhere.
+
                 response = await wallet(walletInfo["address"]).getWalletInformation()
 
                 embed = Embed(title="**User information**", color=0xff0000)
@@ -60,22 +71,18 @@ class GetInfo(Cog):
                     name="Balance:", value=f'`{float(response["result"]["balance"])/10**9}`:gem:', inline=False)
                 embed.set_thumbnail(
                     url=user.avatar_url_as(static_format="png"))
-                embed.set_footer(
-                    text="TON Connector is in alpha. Proceed with caution.")
 
             else:
                 embed = Embed(title="**User information**", color=0xff0000)
                 embed.add_field(name="User:", value=user.mention, inline=False)
                 embed.add_field(
-                    name="Wallet:", value="verified and hidden :white_check_mark:", inline=False)
+                    name="Wallet:", value="Verified, hidden :white_check_mark:", inline=False)
                 embed.set_thumbnail(
                     url=user.avatar_url_as(static_format="png"))
-                embed.set_footer(
-                    text="TON Connector is in alpha. Proceed with caution.")
 
         else:
             embed = automata.generateEmbErr(
-                f"User {user} has not verified their wallet yet. :x:")
+                f"User {user} hasn't verified their wallet yet. :x:")
 
         await ctx.send(embed=embed)
 
@@ -97,7 +104,7 @@ class GetInfo(Cog):
             embed.add_field(
                 name=':white_check_mark:', value=f'{ctx.author.mention} is confirmed owner of `{walletInfo["address"]}`')
             embed.set_footer(
-                text=f'Presented data is verified via TON Connector.')
+                text=f'Data is verified and provided via TON Connector.')
             await ctx.send(embed=embed)
 
         else:

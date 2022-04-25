@@ -33,8 +33,6 @@ class Help(Cog):
         embed.add_field(
             name=':superhero:', value="**[Click here to join developer/support server!](https://discord.gg/4H9j5mVhgN)**", inline=False)
 
-        embed.set_footer(
-            text="TON Connector is in alpha.")
         await ctx.send(embed=embed)
 
 

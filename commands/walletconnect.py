@@ -21,12 +21,26 @@ class WalletConnect(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.message.reply(embed=automata.generateEmbErr("Argument unspecified. Check command syntax => `verif help`", error=error), delete_after=10)
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "Argument unspecified. Check command syntax => `verif help`",
+                    error=error
+                ))
+
         if isinstance(error, PrivateMessageOnly):
             await ctx.message.delete()
-            return await ctx.send(embed=automata.generateEmbErr("You may only connect Your wallet by using direct messages. This is made to keep your data private and secured.", error=error), delete_after=10)
+            return await ctx.send(
+                embed=automata.generateEmbErr(
+                    "You may only connect Your wallet by using direct messages. This was made to keep your data private and secured.",
+                    error=error
+                ), delete_after=10)
+
         if isinstance(error, CommandOnCooldown):
-            return await ctx.message.reply(embed=automata.generateEmbErr("In order to avoid overloading we have set 6 minutes long cooldown on this command. Try again later.", error=error))
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "In order to avoid overloading we have set 6 minutes long cooldown on this command. Try again later.",
+                    error=error
+                ))
 
         raise error
 
@@ -52,8 +66,8 @@ class WalletConnect(Cog):
             if await dbQuery.getWallet(self.bot.database, ctx.author.id) != None:
                 await ctx.send(embed=automata.generateEmbInfo("Wallet is already tethered, proceed ONLY if you want to tether another wallet :exclamation:"))
 
-            embed = Embed(title='Wallet found on TON :white_check_mark:')
-            embed.add_field(name='Follow the instructions!',
+            embed = Embed(title='Wallet found! :white_check_mark:')
+            embed.add_field(name='Follow the instructions:',
                             value="You have 5 minutes to commit the transaction to your wallet (to self) with details specified below")
             await ctx.send(embed=embed)
 
@@ -118,12 +132,12 @@ class WalletConnect(Cog):
 
             result = Embed(title='SUCCESS :white_check_mark:')
             result.add_field(
-                name=f'{ctx.author},', value=f'Your wallet `{address}` is tethered to Your user id! (`{ctx.author.id}`)', inline=False)
+                name=f'{ctx.author},', value=f'Your wallet `{address}` has been successfully tethered to your user id! (`{ctx.author.id}`)', inline=False)
             await ctx.send(embed=result)
         else:
             result = Embed(title='FAIL :x:')
             result.add_field(
-                name=f'{ctx.author},', value=f'unfortunately, Your wallet verification failed. Please contact project support if You need any assistance.', inline=False)
+                name=f'{ctx.author},', value=f'unfortunately, your wallet verification failed. Please contact project support for any assistance.', inline=False)
             await ctx.send(embed=result)
 
 
