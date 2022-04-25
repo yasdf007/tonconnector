@@ -47,12 +47,12 @@ class Perks(Cog):
     async def perkcheck(self, ctx: Context):
         collectionDict = await dbQuery.getConnectedCollection(self.bot.database, ctx.guild.id)
         if not collectionDict:
-            await ctx.send(embed=automata.generateEmbErr("This server has no perks available via TON Connector."))
+            await ctx.message.reply(embed=automata.generateEmbErr("This server has no perks available via TON Connector."))
             return
 
         role = ctx.guild.get_role(collectionDict['role_id'])
         if role in ctx.author.roles:
-            await ctx.send(embed=automata.generateEmbErr(f"You have already obtained your NFT holder perks."))
+            await ctx.message.reply(embed=automata.generateEmbErr(f"You have already obtained your NFT holder perks."))
             return
 
         walletInfo = await dbQuery.getWallet(self.bot.database, ctx.author.id)
