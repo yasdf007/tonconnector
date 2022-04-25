@@ -3,10 +3,14 @@
 
 from discord import Intents, Game, Status
 from discord.ext.commands import Bot as defaultBot, Cog, CommandNotFound
+
 from db import postgres
 
 from dotenv import load_dotenv
 from os import getenv, listdir
+
+from resources.Disintario import DisintarAPI 
+
 load_dotenv()
 
 
@@ -14,6 +18,7 @@ class Bot(defaultBot):
     def __init__(self):
         intents = Intents.default()
         self.game = Game(f"=> verif help <=")
+        self.disintar_api = DisintarAPI()
 
         super().__init__(
             command_prefix="verif ",
@@ -37,10 +42,9 @@ class Bot(defaultBot):
         print('done loading')
 
     @Cog.listener()
-    async def on_command_error(self, error):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             pass
-
 
 if __name__ == "__main__":
     bot = Bot()

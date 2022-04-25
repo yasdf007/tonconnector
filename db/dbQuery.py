@@ -29,3 +29,8 @@ async def insertUserWallet(pool: asyncpg.Pool, userId: int, walletAddress: str) 
     query = "insert into user_wallet(user_id, address) values($1, $2);"
     await pool.execute(query, userId, walletAddress)
     return True
+
+async def getConnectedCollection(pool: asyncpg.Pool, server_id: int):
+    query = "SELECT NFTS.collection_address, NFTS.collection_name, role_id from connected_servers join NFTS on connected_servers.nft_id=NFTS.id where server_id = $1;"
+
+    return await pool.fetchrow(query, server_id)
