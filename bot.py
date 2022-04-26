@@ -9,7 +9,7 @@ from db import postgres
 from dotenv import load_dotenv
 from os import getenv, listdir
 
-from resources.Disintario import DisintarAPI 
+from resources.Disintario import DisintarAPI
 
 load_dotenv()
 
@@ -39,12 +39,14 @@ class Bot(defaultBot):
     async def on_ready(self):
         self.database = await postgres.connectToDB()
         await self.change_presence(status=Status.online, activity=self.game)
+        await self.disintar_api.getCSRF()
         print('done loading')
 
     @Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             pass
+
 
 if __name__ == "__main__":
     bot = Bot()

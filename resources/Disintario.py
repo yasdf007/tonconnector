@@ -31,8 +31,8 @@ class DisintarAPI:
         if not self.getCSRF.is_running():
             self.getCSRF.start()
 
-        while not self.CSRFTOKEN:
-            await asyncio.sleep(1)
+        if not self.CSRFTOKEN:
+            return {'success': False}
 
         self.headers['X-CSRFToken'] = self.CSRFTOKEN
         self.cookies['csrftoken'] = self.CSRFTOKEN
