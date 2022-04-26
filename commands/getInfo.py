@@ -23,7 +23,7 @@ class GetInfo(Cog):
         if isinstance(error, NoPrivateMessage):
             return await ctx.message.reply(
                 embed=automata.generateEmbErr(
-                    "This command can only be used in server channel.",
+                    "This command can only be used in a server channel.",
                     error=error
                 )
             )

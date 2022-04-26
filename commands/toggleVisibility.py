@@ -41,7 +41,9 @@ class ToggleVisibility(Cog):
         if not ok:
             raise NoWalletFound
 
-        await ctx.message.delete()
+        if ctx.guild:
+            await ctx.message.delete()
+
         await ctx.send(embed=automata.generateEmbInfo(f"Visibility changed to `{'public' if newVis else 'private'}`"), delete_after=10)
 
 

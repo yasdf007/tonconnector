@@ -34,6 +34,14 @@ class Perks(Cog):
                     error=error
                 )
             )
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.message.reply(
+                embed=automata.generateEmbErr(
+                    "This command can only be used in a server channel.",
+                    error=error
+                )
+            )
+
         raise error
 
     @guild_only()
