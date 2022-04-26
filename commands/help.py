@@ -23,7 +23,7 @@ class Help(Cog):
         embed.set_thumbnail(
             url="https://cdn.discordapp.com/avatars/966617494708191252/69aa48df063ec479c242f08be9256d93.webp?size=240")
         embed.add_field(
-            name="Connect", value="`verif connect [address]` - verifies and tethers your TON wallet address to your Discord account. Usage only allowed in DMs to avoid any unexpected data leak.", inline=False)
+            name="Connect", value="`verif connect [address]` - verifies and tethers your TON wallet address to your Discord account. Usage only allowed in DMs to avoid any unexpected data leak. CryptoBot and outher custodial wallets are unacceptable.", inline=False)
         embed.add_field(name="User information",
                         value="`verif user [@user]` - shows the information about user (whether he has verified wallet or not). Balance and full address available if user decides to toggle public visibility.", inline=False)
         embed.add_field(
